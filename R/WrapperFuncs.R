@@ -274,10 +274,9 @@ estimClustNum <- function(dat,
     
     # define parallelization
     cl <- makeCluster(cores)
-    clusterExport(
-        cl = cl,
-        varlist = c("ClustComp", "vsclust_algorithm"),
-        envir = environment()
+    on.exit(
+        try(parallel::stopCluster(cl), silent = TRUE),
+        add = TRUE
     )
     
     sds <- dat[rownames(tData), ncol(dat)]
@@ -308,8 +307,6 @@ estimClustNum <- function(dat,
         c(clustout$indices, sum(rowMaxs(clustout$Bestcl$membership) > 0.5),
           sum(rowMaxs(clustout$Bestcl2$membership) > 0.5))
     })
-    
-    stopCluster(cl)
     
     for (NClust in seq(3,maxClust,1))
         ClustInd[NClust - 2,] <- multiOut[[NClust - 2]]
@@ -385,11 +382,10 @@ runClustWrapper <-
             rownames(tData) <- seq_len(nrow(tData))
         }
         cl <- makeCluster(cores)
-        clusterExport(
-            cl = cl,
-            varlist = c("ClustComp", "vsclust_algorithm"),
-            envir = environment()
-        )
+        on.exit(
+            try(parallel::stopCluster(cl), silent = TRUE),
+            add = TRUE
+        )        
         
         clustout <- ClustComp(
             tData,
@@ -400,8 +396,6 @@ runClustWrapper <-
             cl = cl,
             verbose = verbose
         )
-        stopCluster(cl)
-        
         
         if (VSClust) {
             Bestcl <- clustout$Bestcl

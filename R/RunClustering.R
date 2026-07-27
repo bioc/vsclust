@@ -176,7 +176,13 @@ vsclust_algorithm <-
         }
         
         # Check whether constraints are provided or set to NULL
-        if (!is.null(constraints)) {
+        if (is.null(constraints)) {
+            constraints <- matrix(
+                logical(0),
+                nrow = 0L,
+                ncol = 0L
+            )
+        } else {
             if (!is.matrix(constraints)) {
                 stop("Argument 'constraints' must be a matrix or NULL.")
             }
@@ -340,6 +346,9 @@ ClustComp <-
              cl = parallel::makePSOCKcluster(1),
              verbose = FALSE
     ) {
+        
+
+            
         fuzz_out <- determine_fuzz(dim(dat), NClust, Sds)
         m <- fuzz_out$m
         mm <- fuzz_out$mm
@@ -349,6 +358,7 @@ ClustComp <-
             varlist = c("dat", "NClust", "m", "mm","verbose", "constraints", "vsclust_algorithm"),
             envir = environment()
         )
+        
         cls <-
             parLapply(cl, seq_len(NSs), function(x)
                 vsclust_algorithm(
@@ -360,6 +370,8 @@ ClustComp <-
                     iterMax =
                         1000
                 ))
+        
+
         # cls <- lapply(seq_len(NSs), function(x) vsclust_algorithm(tData,NClust,
         # m=m, verbose=FALSE,iterMax=1000))  #print(cls[[1]])
         Bestcl <- cls[[which.min(lapply(cls, function(x)
