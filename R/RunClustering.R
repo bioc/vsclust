@@ -195,7 +195,13 @@ vsclust_algorithm <-
             # matrix needs to be boolean
             if (!is.logical(constraints)) {
                 stop("Matrix 'constraints' must be of type logical (TRUE/FALSE).")
-            } 
+            }
+            if (anyNA(constraints)) {
+                stop("Matrix 'constraints' must not contain NA values.")
+            }
+            if (!any(constraints)) {
+                constraints <- matrix(FALSE, 0L, 0L)
+            }
         }
         
         
